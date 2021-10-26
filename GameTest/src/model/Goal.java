@@ -1,14 +1,12 @@
 package model;
 
+import java.awt.Color;
 import java.awt.Point;
 
-public class  Goal {
+public abstract class Goal {
 	private Point location;
 	private int reward;
-	public Goal(Point location, int reward) {
-		this.location = location;
-		this.reward = reward;
-	}
+	private Color color;
 	public Point getLocation() {
 		return location;
 	}
@@ -21,6 +19,14 @@ public class  Goal {
 	public void setReward(int reward) {
 		this.reward = reward;
 	}
+	public Color getColor() {
+		return color;
+	}
+	public void setColor(Color color) {
+		this.color = color;
+	}
+	
+	
 	
 	
 }

@@ -24,7 +24,7 @@ public class GameRenderer {
 		g.drawRect(0,0, cellSize * frame.getMap().getQtdCellsWidth(), cellSize * frame.getMap().getQtdCellsHeight());
 		
 		// desenha o objetivo
-		g.setColor(Color.red);
+		g.setColor(frame.getGoal().getColor());
 		g.fillOval(cellSize * frame.getGoal().getLocation().x, cellSize * frame.getGoal().getLocation().y, cellSize, cellSize);
 		
 		//desenha a kroba

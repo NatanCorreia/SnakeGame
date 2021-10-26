@@ -1,8 +1,11 @@
 package controller;
 
+import model.Apple;
+import model.Banana;
 import model.GameFrame;
 import model.GameMap;
 import model.Goal;
+import model.Rock;
 import model.Segment;
 import model.Snek;
 import java.awt.event.KeyEvent;
@@ -16,6 +19,7 @@ public class GameController {
 	private GameFrame currentFrame = null;
 	public static final int GAME_SPEED = 70; // millis/frame
 	private Random random;
+	
 
 	public void init() {
 		GameMap map = new GameMap(30,24, new Point(5, 12));
@@ -26,9 +30,10 @@ public class GameController {
 		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x-2, map.getSpawnPoint().y)));
 		Snek snek = new Snek(snekSegments, new Point(1,0));
 		
-		Goal goal = new Goal(new Point(28, 4), 10);
+		Apple goal = new Apple(new Point(28,4));
 		
 		currentFrame = new GameFrame(snek, goal, map);
+		
 	}
 	
 	public void processKeyEvent(KeyEvent evt) {
@@ -39,9 +44,11 @@ public class GameController {
 			currentFrame.getSnek().setVelocity(new Point(0, -1));
         }
         else if(code == KeyEvent.VK_RIGHT) {
+        	if(currentFrame.getSnek().getVelocity().x!=-1)
         	currentFrame.getSnek().setVelocity(new Point(1, 0));
         }
         else if(code == KeyEvent.VK_LEFT) {
+        	if(currentFrame.getSnek().getVelocity().x!=1)
         	currentFrame.getSnek().setVelocity(new Point(-1, 0));}
         else if(code == KeyEvent.VK_DOWN) {
         	if(currentFrame.getSnek().getVelocity().y!=-1)
@@ -77,13 +84,46 @@ public class GameController {
 	}
 	
 	private boolean verifyGoal() {
+		int banana = 0, rock =0;
 		Segment currentHead = snekHead();
 		if(currentHead.getLocation().equals(currentFrame.getGoal().getLocation())) {
 			currentFrame.setScore(currentFrame.getGoal().getReward()+ currentFrame.getScore());
 			System.out.println("NOVA PONTUACAO: " + currentFrame.getScore());
-		
+			if(currentFrame.getScore()%30==0) {
+				banana=1;
+			}
+			if(currentFrame.getScore()%40==0)
+				rock=1;
 			
-			newApple();
+			if(rock==1) {
+				newGoal(new Rock());
+				Thread t = new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							Thread.sleep(7000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+							newGoal(new Apple());
+						
+						
+						
+					}}) {};
+					t.start();
+				
+			}
+			if(banana==1) {
+				newGoal(new Banana());
+				
+				}
+			if(banana==0 && rock==0) 
+			newGoal(new Apple());
+			
+			banana=0;
+			rock=0;
 			return true;
 		}
 		return false;
@@ -103,8 +143,9 @@ public class GameController {
 	public GameFrame getCurrentFrame() {
 		return currentFrame;
 	}
-	public void newApple() {
+	public void newGoal(Goal goal) {
 		Point ponto = new Point(random.nextInt(currentFrame.getMap().getQtdCellsWidth()),random.nextInt(currentFrame.getMap().getQtdCellsHeight()));
+		currentFrame.setGoal(goal);
 		currentFrame.getGoal().setLocation(ponto);
 		
 	}
