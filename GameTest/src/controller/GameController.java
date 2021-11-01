@@ -5,11 +5,12 @@ import model.Banana;
 import model.GameFrame;
 import model.GameMap;
 import model.Goal;
+import model.Obstacle;
 import model.Rock;
 import model.Segment;
 import model.Snek;
 import java.awt.event.KeyEvent;
-
+import java.awt.Color;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Random;
@@ -19,20 +20,42 @@ public class GameController {
 	private GameFrame currentFrame = null;
 	public static final int GAME_SPEED = 70; // millis/frame
 	private Random random;
-	
+	private int timePassed =0;
+	private ArrayList<Point> pontos;
 
 	public void init() {
-		GameMap map = new GameMap(30,24, new Point(5, 12));
+		ArrayList<Segment> obstacleSegments = new ArrayList<>();
+		
 		random = new Random();
+		int x = random.nextInt(28);
+		int y = random.nextInt(22);
+		obstacleSegments.add(new Segment(new Point(x*5,y)));
+		obstacleSegments.add(new Segment(new Point((x+4)*5,y)));
+		obstacleSegments.add(new Segment(new Point((x-4)*5,y)));
+		obstacleSegments.add(new Segment(new Point((x-8)*5,y)));
+		obstacleSegments.add(new Segment(new Point((x+8)*5,y)));
+		x = random.nextInt(28);
+		y = random.nextInt(22);
+		obstacleSegments.add(new Segment(new Point(x,y*5)));
+		obstacleSegments.add(new Segment(new Point(x,(y+4)*5)));
+		obstacleSegments.add(new Segment(new Point(x,(y-4)*5)));
+		Obstacle obstacle = new Obstacle(obstacleSegments);
+		ArrayList<Obstacle> obstacles = new ArrayList<>();
+		obstacles.add(obstacle);
+		
+		GameMap map = new GameMap(30,24, new Point(5, 12), obstacles);
+		
 		ArrayList<Segment> snekSegments = new ArrayList<>();
 		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x, map.getSpawnPoint().y)));
 		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x-1, map.getSpawnPoint().y)));
 		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x-2, map.getSpawnPoint().y)));
 		Snek snek = new Snek(snekSegments, new Point(1,0));
 		
+		
 		Apple goal = new Apple(new Point(28,4));
 		
 		currentFrame = new GameFrame(snek, goal, map);
+		
 		
 	}
 	
@@ -75,63 +98,63 @@ public class GameController {
 			Segment currentHead = snekHead();
 			Segment nextHead = new Segment(new Point(currentHead.getLocation().x + snek.getVelocity().x, currentHead.getLocation().y + snek.getVelocity().y));
 			snek.getSegments().add(0, nextHead);
-			
-			if(!verifyGoal()) {
+			boolean b = verifyGoal();
+			if(currentFrame.getGoal() instanceof Rock) { 
+				timePassed +=GAME_SPEED;
+				Rock r = (Rock)currentFrame.getGoal();
+				if(timePassed>=r.getLifeTime()) {
+					newGoal(new Apple());
+					timePassed=0;}
+				}
+				
+			if(!b) {
 				snek.getSegments().remove(snek.getSegments().size()-1);
+				
 			}
+			if(b) 
+				processGoal();
+				
 			verifyEndGame();
 		}
 	}
 	
 	private boolean verifyGoal() {
-		int banana = 0, rock =0;
+		
 		Segment currentHead = snekHead();
 		if(currentHead.getLocation().equals(currentFrame.getGoal().getLocation())) {
 			currentFrame.setScore(currentFrame.getGoal().getReward()+ currentFrame.getScore());
 			System.out.println("NOVA PONTUACAO: " + currentFrame.getScore());
-			if(currentFrame.getScore()%30==0) {
-				banana=1;
-			}
-			if(currentFrame.getScore()%40==0)
-				rock=1;
-			
-			if(rock==1) {
-				newGoal(new Rock());
-				Thread t = new Thread(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							Thread.sleep(7000);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-							newGoal(new Apple());
-						
-						
-						
-					}}) {};
-					t.start();
-				
-			}
-			if(banana==1) {
-				newGoal(new Banana());
-				
-				}
-			if(banana==0 && rock==0) 
-			newGoal(new Apple());
-			
-			banana=0;
-			rock=0;
+		
 			return true;
 		}
 		return false;
 	}
+	public void processGoal() {
+		int banana =0, rock =0;
+		if(currentFrame.getScore()%30==0) {
+			banana=1;
+		}
+		if(currentFrame.getScore()%40==0)
+			rock=1;
+		
+		if(rock==1) {
+			newGoal(new Rock());
+		}
+		if(banana==1) {
+			newGoal(new Banana());
+			
+			}
+		if(banana==0 && rock==0) 
+		newGoal(new Apple());
+		
+		banana=0;
+		rock=0;
+	}
 	
 	private void verifyEndGame() {
 		boolean isStillAlive = true;
-		if(snekHead().getLocation().x<0 || snekHead().getLocation().x>=currentFrame.getMap().getQtdCellsWidth() || snekHead().getLocation().y<0 || snekHead().getLocation().y>currentFrame.getMap().getQtdCellsHeight() || bodyColision() )
+		if(snekHead().getLocation().x<0 || snekHead().getLocation().x>currentFrame.getMap().getQtdCellsWidth() || snekHead().getLocation().y<0 
+				|| snekHead().getLocation().y>currentFrame.getMap().getQtdCellsHeight() || bodyColision() || obstacleColision())
 			isStillAlive=false;
 		currentFrame.getSnek().setSnekIsAlive(isStillAlive); 
 	}
@@ -152,6 +175,13 @@ public class GameController {
 	public boolean bodyColision() {
 		for(int i = 1; i<currentFrame.getSnek().getSegments().size();i++) {
 			if(snekHead().getLocation().equals(currentFrame.getSnek().getSegments().get(i).getLocation()))
+				return true;
+		}
+		return false;
+	}
+	public boolean obstacleColision() {
+		for(int i = 0; i<currentFrame.getMap().getObstacles().get(0).getSegments().size();i++) {
+			if(snekHead().getLocation().equals(currentFrame.getMap().getObstacles().get(0).getSegments().get(i).getLocation()))
 				return true;
 		}
 		return false;

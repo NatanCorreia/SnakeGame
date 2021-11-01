@@ -9,7 +9,6 @@ public class Snek {
 	private boolean snekIsAlive = true;
 	
 	public Snek(ArrayList<Segment> segments, Point velocity) {
-		super();
 		this.segments = segments;
 		this.velocity = velocity;
 	}

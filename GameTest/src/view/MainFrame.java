@@ -64,15 +64,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
 
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        if(controller.getCurrentFrame().getSnek().isSnekIsAlive()) {
-	        controller.generateNextFrame();
-	        renderer.renderFrame(controller.getCurrentFrame(), g);
-        }else {
-        	renderer.drawEndGame(controller.getCurrentFrame(), g);
-        	timer.stop();
-        	
-        	String usr =JOptionPane.showInputDialog("Digite seu Nome:");    	       	  
-        }
+        paintGame(g);
         
     }
 
@@ -83,7 +75,17 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
     public void keyPressed(KeyEvent e) {
         controller.processKeyEvent(e);
     }
-
+    public void paintGame(Graphics g) {
+    	  if(controller.getCurrentFrame().getSnek().isSnekIsAlive()) {
+  	        controller.generateNextFrame();
+  	        renderer.renderFrame(controller.getCurrentFrame(), g);
+          }else {
+          	renderer.drawEndGame(controller.getCurrentFrame(), g);
+          	timer.stop();
+          	
+          	   	       	  
+          }
+    }
     public void keyTyped(KeyEvent e) {}
     public void keyReleased(KeyEvent e) {}
 }

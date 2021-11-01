@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 
+import controller.GameStates;
 import model.GameFrame;
 import model.Segment;
 
@@ -17,6 +18,25 @@ public class GameRenderer {
 	}
 
 	public void renderFrame(GameFrame frame, Graphics g) {
+		switch(GameStates.gameState) {
+		case MENU:
+			break;
+		case PLAYING:
+			drawGame(frame,g);
+			break;
+		case USERDATA:
+			break;
+		}
+	}
+	public void drawEndGame(GameFrame frame, Graphics g) {
+		g.setFont(new Font("Ink Free",Font.BOLD,75));
+		g.setColor(Color.red);
+		FontMetrics metrics = g.getFontMetrics(g.getFont());
+		g.drawString("Game Over", (panelSize.width - metrics.stringWidth("Game Over"))/2, panelSize.height/2);
+		
+	}
+	
+	public void drawGame(GameFrame frame, Graphics g) {
 		int cellSize = Math.min(panelSize.width/frame.getMap().getQtdCellsWidth(),panelSize.height/frame.getMap().getQtdCellsHeight());
 		//desenha os limites to mapa
 		g.setColor(Color.blue);
@@ -39,15 +59,8 @@ public class GameRenderer {
 		g.setFont(new Font("Ink Free",Font.BOLD,40));
 		FontMetrics metrics = g.getFontMetrics(g.getFont());
 		g.drawString("SCORE: " + frame.getScore(), (panelSize.width - metrics.stringWidth("SCORE: " + frame.getScore()))/2, panelSize.height-g.getFont().getSize());
-		
-		g.drawLine(cellSize*5,cellSize* 5,cellSize* 10,cellSize* 5);
+		for(int i = 0; i<frame.getMap().getObstacles().get(0).getSegments().size();i++) {
+		g.fill3DRect((frame.getMap().getObstacles().get(0).getSegments().get(i).getLocation().x),(frame.getMap().getObstacles().get(0).getSegments().get(i).getLocation().y),cellSize,cellSize,true);}
 		// desenha obstaculos, o score atual...
-	}
-	public void drawEndGame(GameFrame frame, Graphics g) {
-		g.setFont(new Font("Ink Free",Font.BOLD,75));
-		g.setColor(Color.red);
-		FontMetrics metrics = g.getFontMetrics(g.getFont());
-		g.drawString("Game Over", (panelSize.width - metrics.stringWidth("Game Over"))/2, panelSize.height/2);
-		
 	}
 }
