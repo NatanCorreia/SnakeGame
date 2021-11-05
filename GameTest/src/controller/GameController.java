@@ -29,21 +29,13 @@ public class GameController {
 		random = new Random();
 		int x = random.nextInt(28);
 		int y = random.nextInt(22);
-		obstacleSegments.add(new Segment(new Point(x*5,y)));
-		obstacleSegments.add(new Segment(new Point((x+4)*5,y)));
-		obstacleSegments.add(new Segment(new Point((x-4)*5,y)));
-		obstacleSegments.add(new Segment(new Point((x-8)*5,y)));
-		obstacleSegments.add(new Segment(new Point((x+8)*5,y)));
-		x = random.nextInt(28);
-		y = random.nextInt(22);
-		obstacleSegments.add(new Segment(new Point(x,y*5)));
-		obstacleSegments.add(new Segment(new Point(x,(y+4)*5)));
-		obstacleSegments.add(new Segment(new Point(x,(y-4)*5)));
+		obstacleSegments.add(new Segment(new Point(20,20)));
+	
 		Obstacle obstacle = new Obstacle(obstacleSegments);
-		ArrayList<Obstacle> obstacles = new ArrayList<>();
-		obstacles.add(obstacle);
 		
-		GameMap map = new GameMap(30,24, new Point(5, 12), obstacles);
+		
+		
+		GameMap map = new GameMap(30,24, new Point(5, 12), obstacle);
 		
 		ArrayList<Segment> snekSegments = new ArrayList<>();
 		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x, map.getSpawnPoint().y)));
@@ -180,10 +172,12 @@ public class GameController {
 		return false;
 	}
 	public boolean obstacleColision() {
-		for(int i = 0; i<currentFrame.getMap().getObstacles().get(0).getSegments().size();i++) {
-			if(snekHead().getLocation().equals(currentFrame.getMap().getObstacles().get(0).getSegments().get(i).getLocation()))
-				return true;
-		}
-		return false;
+		
+			if(snekHead().getLocation().equals(new Point(20,20))) {
+				System.out.println("True");
+				return true;}
+			else
+			{ System.out.println("False");
+		return false;}
 	}
 }

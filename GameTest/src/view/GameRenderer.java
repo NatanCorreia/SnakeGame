@@ -59,8 +59,8 @@ public class GameRenderer {
 		g.setFont(new Font("Ink Free",Font.BOLD,40));
 		FontMetrics metrics = g.getFontMetrics(g.getFont());
 		g.drawString("SCORE: " + frame.getScore(), (panelSize.width - metrics.stringWidth("SCORE: " + frame.getScore()))/2, panelSize.height-g.getFont().getSize());
-		for(int i = 0; i<frame.getMap().getObstacles().get(0).getSegments().size();i++) {
-		g.fill3DRect((frame.getMap().getObstacles().get(0).getSegments().get(i).getLocation().x),(frame.getMap().getObstacles().get(0).getSegments().get(i).getLocation().y),cellSize,cellSize,true);}
+		for(int i = 0; i<frame.getMap().getObstacles().getSegments().size();i++) {
+		g.fillRect((frame.getMap().getObstacles().getSegments().get(i).getLocation().x),(frame.getMap().getObstacles().getSegments().get(i).getLocation().y),cellSize,cellSize);}
 		// desenha obstaculos, o score atual...
 	}
 }

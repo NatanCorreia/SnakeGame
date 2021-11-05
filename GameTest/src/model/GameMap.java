@@ -7,10 +7,10 @@ public class GameMap {
 	private int qtdCellsWidth;
 	private int qtdCellsHeight;
 	private Point spawnPoint;
-	private ArrayList<Obstacle> obstacles;
+	private Obstacle obstacles;
 	
 	// pode add tb obstaculos...
-	public GameMap(int cellsWidth, int cellsHeight, Point spawnPoint, ArrayList<Obstacle> obstacles) {
+	public GameMap(int cellsWidth, int cellsHeight, Point spawnPoint, Obstacle obstacles) {
 		this.qtdCellsWidth = cellsWidth;
 		this.qtdCellsHeight = cellsHeight;
 		this.spawnPoint = spawnPoint;
@@ -41,13 +41,15 @@ public class GameMap {
 		this.spawnPoint = spawnPoint;
 	}
 
-	public ArrayList<Obstacle> getObstacles() {
+	public Obstacle getObstacles() {
 		return obstacles;
 	}
 
-	public void setObstacles(ArrayList<Obstacle> obstacles) {
+	public void setObstacles(Obstacle obstacles) {
 		this.obstacles = obstacles;
 	}
+
+	
 	
 	
 }
