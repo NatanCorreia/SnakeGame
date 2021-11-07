@@ -15,4 +15,9 @@ public class Apple extends Goal {
 		this.setColor(Color.red);
 		this.setLocation(ponto);
 	}
+	public Apple(int x, int y) {
+		this.setReward(10);
+		this.setColor(Color.red);
+		this.setLocation(new Point(x,y));
+	}
 }

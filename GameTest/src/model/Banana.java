@@ -10,4 +10,9 @@ public class Banana extends Goal {
 		this.setColor(Color.yellow);
 		this.setReward(20);
 	}
+	public Banana(int x, int y) {
+		this.setReward(20);
+		this.setColor(Color.yellow);
+		this.setLocation(new Point(x,y));
+	}
 }

@@ -22,7 +22,7 @@ public class Fichario<T extends Fichavel> {
 	public boolean cadastrar(T novo) {
 		try {
 			PreparedStatement stmt = catalogoDao.getInsertStatement(conn, novo);
-			stmt.execute();
+
 			stmt.close();
 			return true;
 		}catch(SQLException e) {
@@ -32,6 +32,16 @@ public class Fichario<T extends Fichavel> {
 		
 	}
 
+	public T buscarItem(int idUnico)  {
+		
+			try{T item = catalogoDao.buscarItem(idUnico);
+			return item;}
+			catch(SQLException e) {
+				
+				e.printStackTrace();
+			
+			return null;}
+		}
 	
 
 	public boolean alterar(String idUnico, T novo)  {
@@ -46,8 +56,18 @@ public class Fichario<T extends Fichavel> {
 			return false;
 		}
 	}
-       
-
+       public boolean atualizarScore(int idUnico, int score) {
+    	   try {
+   			PreparedStatement stmt = catalogoDao.updateScore(conn, idUnico, score);
+   			boolean result = stmt.execute();
+   			stmt.close();
+   			return result;
+   		}catch(SQLException e) {
+   			e.printStackTrace();
+   			return false;
+   		}
+    	   
+       }
 	public boolean deletar(String idUnico) {
 		ResultSet rs;
 		String t =null;

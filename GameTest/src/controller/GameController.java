@@ -6,68 +6,86 @@ import model.GameFrame;
 import model.GameMap;
 import model.Goal;
 import model.Obstacle;
+import model.Player;
+import model.PlayerStatus;
 import model.Rock;
 import model.Segment;
 import model.Snek;
+import view.MainFrame;
+
 import java.awt.event.KeyEvent;
+import java.sql.SQLException;
 import java.awt.Color;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class GameController {
+import javax.swing.JOptionPane;
+
+import helpers.LoadSave;
+
+public class GameController  {
 
 	private GameFrame currentFrame = null;
-	public static final int GAME_SPEED = 70; // millis/frame
+	public static int GAME_SPEED; // millis/frame
 	private Random random;
 	private int timePassed =0;
 	private ArrayList<Point> pontos;
+	private LoadSave lS = new LoadSave();
+	private Fichario<Player> ficharioPlayer;
+	private PlayerStatus ps;
 
-	public void init() {
+	public void init() throws SQLException {
 		ArrayList<Segment> obstacleSegments = new ArrayList<>();
-		
+		ficharioPlayer = new Fichario(new PlayerDao());
+		 
 		random = new Random();
 		int x = random.nextInt(28);
 		int y = random.nextInt(22);
 		obstacleSegments.add(new Segment(new Point(20,20)));
-	
 		Obstacle obstacle = new Obstacle(obstacleSegments);
-		
-		
-		
 		GameMap map = new GameMap(30,24, new Point(5, 12), obstacle);
-		
 		ArrayList<Segment> snekSegments = new ArrayList<>();
 		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x, map.getSpawnPoint().y)));
 		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x-1, map.getSpawnPoint().y)));
 		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x-2, map.getSpawnPoint().y)));
 		Snek snek = new Snek(snekSegments, new Point(1,0));
-		
-		
 		Apple goal = new Apple(new Point(28,4));
 		
 		currentFrame = new GameFrame(snek, goal, map);
+		currentFrame.checkDifficulty();
+		if(MainFrame.Load) {
+			currentFrame = lS.processAndLoad(MainFrame.FILE_NAME, currentFrame);
+			
+			GameController.GAME_SPEED = currentFrame.getGameDifficulty();
+			MainFrame.PLAYER_ID = currentFrame.getPlayerId();
+			
+		}
+		
+			//ps = new PlayerStatus(currentFrame,map,ficharioPlayer.buscarItem(MainFrame.PLAYER_ID));
+			
+		
 		
 		
 	}
 	
 	public void processKeyEvent(KeyEvent evt) {
 		int code = evt.getKeyCode();
-		
+		lS = new LoadSave();
 		if(code == KeyEvent.VK_UP) {
-			if(currentFrame.getSnek().getVelocity().y!=1)
-			currentFrame.getSnek().setVelocity(new Point(0, -1));
+			if(currentFrame.getSnek().getDirection().y!=1)
+			currentFrame.getSnek().setDirection(new Point(0, -1));
         }
         else if(code == KeyEvent.VK_RIGHT) {
-        	if(currentFrame.getSnek().getVelocity().x!=-1)
-        	currentFrame.getSnek().setVelocity(new Point(1, 0));
+        	if(currentFrame.getSnek().getDirection().x!=-1)
+        	currentFrame.getSnek().setDirection(new Point(1, 0));
         }
         else if(code == KeyEvent.VK_LEFT) {
-        	if(currentFrame.getSnek().getVelocity().x!=1)
-        	currentFrame.getSnek().setVelocity(new Point(-1, 0));}
+        	if(currentFrame.getSnek().getDirection().x!=1)
+        	currentFrame.getSnek().setDirection(new Point(-1, 0));}
         else if(code == KeyEvent.VK_DOWN) {
-        	if(currentFrame.getSnek().getVelocity().y!=-1)
-        	currentFrame.getSnek().setVelocity(new Point(0, 1));}
+        	if(currentFrame.getSnek().getDirection().y!=-1)
+        	currentFrame.getSnek().setDirection(new Point(0, 1));}
         else if(code == KeyEvent.VK_SPACE && currentFrame.isPausou()) {
         	
         	currentFrame.setPausou(false);
@@ -75,6 +93,9 @@ public class GameController {
         else if(code == KeyEvent.VK_SPACE) {
         	
         	currentFrame.setPausou(true);
+        }
+        else if( code == KeyEvent.VK_S) {
+        	lS.processAndWrite(JOptionPane.showInputDialog("Type the name of the save: "),currentFrame);
         }
 	}
 	
@@ -88,7 +109,7 @@ public class GameController {
 		if(currentFrame.getSnek().isSnekIsAlive() && !currentFrame.isPausou()) {
 			Snek snek = currentFrame.getSnek();
 			Segment currentHead = snekHead();
-			Segment nextHead = new Segment(new Point(currentHead.getLocation().x + snek.getVelocity().x, currentHead.getLocation().y + snek.getVelocity().y));
+			Segment nextHead = new Segment(new Point(currentHead.getLocation().x + snek.getDirection().x, currentHead.getLocation().y + snek.getDirection().y));
 			snek.getSegments().add(0, nextHead);
 			boolean b = verifyGoal();
 			if(currentFrame.getGoal() instanceof Rock) { 
@@ -146,7 +167,7 @@ public class GameController {
 	private void verifyEndGame() {
 		boolean isStillAlive = true;
 		if(snekHead().getLocation().x<0 || snekHead().getLocation().x>currentFrame.getMap().getQtdCellsWidth() || snekHead().getLocation().y<0 
-				|| snekHead().getLocation().y>currentFrame.getMap().getQtdCellsHeight() || bodyColision() || obstacleColision())
+				|| snekHead().getLocation().y>currentFrame.getMap().getQtdCellsHeight() || bodyColision() /*|| obstacleColision()*/)
 			isStillAlive=false;
 		currentFrame.getSnek().setSnekIsAlive(isStillAlive); 
 	}
@@ -164,20 +185,20 @@ public class GameController {
 		currentFrame.getGoal().setLocation(ponto);
 		
 	}
-	public boolean bodyColision() {
+	private boolean bodyColision() {
 		for(int i = 1; i<currentFrame.getSnek().getSegments().size();i++) {
 			if(snekHead().getLocation().equals(currentFrame.getSnek().getSegments().get(i).getLocation()))
 				return true;
 		}
 		return false;
 	}
-	public boolean obstacleColision() {
+	private boolean obstacleColision() {
 		
 			if(snekHead().getLocation().equals(new Point(20,20))) {
-				System.out.println("True");
+				//System.out.println("True");
 				return true;}
 			else
-			{ System.out.println("False");
+			{ //System.out.println("False");
 		return false;}
 	}
 }

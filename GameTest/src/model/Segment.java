@@ -4,6 +4,7 @@ import java.awt.Point;
 
 public class Segment {
 	private Point location;
+	private int id;
 	// pode definir formato, cor...
 
 	public Segment(Point location) {

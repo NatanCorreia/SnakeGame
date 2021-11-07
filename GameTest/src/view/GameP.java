@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.sql.SQLException;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
@@ -20,7 +21,7 @@ public class GameP extends JPanel implements ActionListener, KeyListener {
     private GameRenderer renderer = new GameRenderer(PANEL_SIZE);
     private GameController controller = new GameController();
 
-    public GameP() {
+    public GameP() throws SQLException {
         addKeyListener(this);
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);

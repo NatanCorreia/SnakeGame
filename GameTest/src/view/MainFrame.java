@@ -26,30 +26,115 @@ import controller.PlayerDao;
 
 
 public class MainFrame extends JFrame {
-private JPanel uiMenuPanel;
-private ButtonsPanel bF = new ButtonsPanel();
+private JPanel uiMenuPanel, uiDPanel;
+public static int PLAYER_ID;
+public static String FILE_NAME;
+public static boolean Load;
+private ButtonsPanel bP = new ButtonsPanel();
+private DifficultyPanel dP = new DifficultyPanel();
 private UserTextPanel uTP = new UserTextPanel();
-private Fichario<Player> ficharioPlayer;
+private Fichario<Player> ficharioPlayer = new Fichario(new PlayerDao());
 
     public MainFrame() throws SQLException {
         super("Main Frame");
-        ficharioPlayer = new Fichario(new PlayerDao());
-        bF.getPlayButton().addActionListener(new ActionListener() {
+         
+        bP.getPlayButton().addActionListener(new ActionListener() {
         	@Override
         	public void actionPerformed(ActionEvent e) {
         		uiMenuPanel.setVisible(false);
-        		GamePanel gamePanel = new GamePanel();
-        		getContentPane().add(gamePanel,BorderLayout.CENTER);
-        		gamePanel.requestFocus();
+        		uiDPanel = new JPanel();
+        		uiDPanel.setPreferredSize(new Dimension(600,600));
+        		uiDPanel.setBorder(new EmptyBorder(80,0,0,0));
+        		uiDPanel.add(dP);
+        		getContentPane().add(uiDPanel, BorderLayout.CENTER);
+        		dP.getEasyButton().addActionListener(new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent e) {
+        		uiDPanel.setVisible(false);
+        		GameController.GAME_SPEED = 100;
+        		GamePanel gamePanel;
+				try {
+					gamePanel = new GamePanel();
+					getContentPane().add(gamePanel,BorderLayout.CENTER);
+	        		gamePanel.requestFocus();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+        		
+        		
+        	
         	}
         });
-        bF.getUserDataButton().addActionListener(new ActionListener() {
+        		dP.getNormalButton().addActionListener(new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent e) {
+        		uiDPanel.setVisible(false);
+        		GameController.GAME_SPEED = 70;
+        		GamePanel gamePanel;
+				try {
+					gamePanel = new GamePanel();
+					getContentPane().add(gamePanel,BorderLayout.CENTER);
+	        		gamePanel.requestFocus();
+				} catch (SQLException e1) {
+					
+					e1.printStackTrace();
+				}
+        		
+        		
+        	
+        	}
+        });
+        		dP.getHardButton().addActionListener(new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent e) {
+        		uiDPanel.setVisible(false);
+        		GameController.GAME_SPEED = 40;
+        		GamePanel gamePanel;
+				try {
+					gamePanel = new GamePanel();
+					getContentPane().add(gamePanel,BorderLayout.CENTER);
+	        		gamePanel.requestFocus();
+				} catch (SQLException e1) {
+					
+					e1.printStackTrace();
+				}
+        		
+        		
+        	
+        	}
+        });
+        
+        	}
+        });
+        bP.getUserDataButton().addActionListener(new ActionListener() {
         	@Override
         	public void actionPerformed(ActionEvent e) {
         		uiMenuPanel.setVisible(false);
            		getContentPane().add(uTP,BorderLayout.CENTER);
         		uTP.requestFocus();
-        		//player.setNome(uTP.getNome().getText());
+        		
+        	
+        	}
+        });
+        bP.getLoadButton().addActionListener(new ActionListener() {
+        	@Override
+        	public void actionPerformed(ActionEvent e) {
+        		uiMenuPanel.setVisible(false);
+        		//String str =JOptionPane.showInputDialog("Name of the file that you want to load: ");
+        		//System.out.println(str);
+        		MainFrame.FILE_NAME = "Natan";
+           		MainFrame.Load = true;
+           		GamePanel gamePanel;
+				try {
+					gamePanel = new GamePanel();
+					getContentPane().add(gamePanel,BorderLayout.CENTER);
+					gamePanel.requestFocus();
+				} catch (SQLException e1) {
+					
+					e1.printStackTrace();
+				}
+        		
         	
         	}
         });
@@ -57,7 +142,7 @@ private Fichario<Player> ficharioPlayer;
         uiMenuPanel = new JPanel();
         uiMenuPanel.setPreferredSize(new Dimension(600,600));
         uiMenuPanel.setBorder(new EmptyBorder(80,0,0,0));
-        uiMenuPanel.add(bF);
+        uiMenuPanel.add(bP);
         
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         getContentPane().add(uiMenuPanel, BorderLayout.CENTER);
@@ -73,6 +158,7 @@ private Fichario<Player> ficharioPlayer;
         			JOptionPane.showMessageDialog(null, "Preencher todos os campos");        		}
         		Player playerTemp = new Player(uTP.getNome().getText(),uTP.getLogin().getText(),uTP.getEmail().getText(),uTP.getPassword().getText());
         		ficharioPlayer.cadastrar(playerTemp);
+        		MainFrame.PLAYER_ID = playerTemp.getId();
         		uTP.setVisible(false);
         		uiMenuPanel.setVisible(true);
         	
@@ -98,19 +184,20 @@ private Fichario<Player> ficharioPlayer;
     }
 }
 
-class GamePanel extends JPanel implements ActionListener, KeyListener {
+class GamePanel extends JPanel implements ActionListener, KeyListener  {
     private static final Dimension PANEL_SIZE = new Dimension(600, 600);
     
 
-    private Timer timer = new Timer(GameController.GAME_SPEED, this);
+    private Timer timer;
     private GameRenderer renderer = new GameRenderer(PANEL_SIZE);
     private GameController controller = new GameController();
-
-    public GamePanel() {
+    private Fichario<Player> ficharioPlayer = new Fichario(new PlayerDao());
+    public GamePanel() throws SQLException {
         addKeyListener(this);
         setFocusable(true);
         setFocusTraversalKeysEnabled(false);
         controller.init();
+        timer= new Timer(GameController.GAME_SPEED, this);
         timer.start();      
     }
 
@@ -137,6 +224,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
   	        renderer.renderFrame(controller.getCurrentFrame(), g);
           }else {
           	renderer.drawEndGame(controller.getCurrentFrame(), g);
+          	ficharioPlayer.atualizarScore(MainFrame.PLAYER_ID, controller.getCurrentFrame().getScore());
           	timer.stop();
           	
           	   	       	  

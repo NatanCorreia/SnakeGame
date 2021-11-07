@@ -5,12 +5,12 @@ import java.awt.Point;
 
 public class Snek {
 	private ArrayList<Segment> segments;
-	private Point velocity;
+	private Point direction;
 	private boolean snekIsAlive = true;
 	
-	public Snek(ArrayList<Segment> segments, Point velocity) {
+	public Snek(ArrayList<Segment> segments, Point location) {
 		this.segments = segments;
-		this.velocity = velocity;
+		this.direction = location;
 	}
 	
 
@@ -32,12 +32,15 @@ public class Snek {
 		this.segments = segments;
 	}
 
-	public Point getVelocity() {
-		return velocity;
+	public Point getDirection() {
+		return direction;
 	}
 
-	public void setVelocity(Point velocity) {
-		this.velocity = velocity;
+	public void setDirection(Point location) {
+		this.direction = location;
+	}
+	public void setDirection(int x, int y) {
+		this.direction = new Point(x,y);
 	}
 	
 	
