@@ -1,5 +1,14 @@
 package controller;
 
+import java.awt.Point;
+import java.awt.event.KeyEvent;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Random;
+
+import javax.swing.JOptionPane;
+
+import helpers.LoadSave;
 import model.Apple;
 import model.Banana;
 import model.GameFrame;
@@ -13,192 +22,193 @@ import model.Segment;
 import model.Snek;
 import view.MainFrame;
 
-import java.awt.event.KeyEvent;
-import java.sql.SQLException;
-import java.awt.Color;
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.Random;
-
-import javax.swing.JOptionPane;
-
-import helpers.LoadSave;
-
-public class GameController  {
+public class GameController {
 
 	private GameFrame currentFrame = null;
-	public static int GAME_SPEED; // millis/frame
+	public static int GAME_SPEED;
 	private Random random;
-	private int timePassed =0;
+	private int timePassed = 0;
 	private ArrayList<Point> pontos;
 	private LoadSave lS = new LoadSave();
 	private Fichario<Player> ficharioPlayer;
 	private PlayerStatus ps;
 
 	public void init() throws SQLException {
-		ArrayList<Segment> obstacleSegments = new ArrayList<>();
-		ficharioPlayer = new Fichario(new PlayerDao());
-		 
-		random = new Random();
-		int x = random.nextInt(28);
-		int y = random.nextInt(22);
-		obstacleSegments.add(new Segment(new Point(20,20)));
-		Obstacle obstacle = new Obstacle(obstacleSegments);
-		GameMap map = new GameMap(30,24, new Point(5, 12), obstacle);
-		ArrayList<Segment> snekSegments = new ArrayList<>();
-		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x, map.getSpawnPoint().y)));
-		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x-1, map.getSpawnPoint().y)));
-		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x-2, map.getSpawnPoint().y)));
-		Snek snek = new Snek(snekSegments, new Point(1,0));
-		Apple goal = new Apple(new Point(28,4));
-		
-		currentFrame = new GameFrame(snek, goal, map);
+		initClasses();
 		currentFrame.checkDifficulty();
-		if(MainFrame.Load) {
+		if (MainFrame.Load) {
 			currentFrame = lS.processAndLoad(MainFrame.FILE_NAME, currentFrame);
-			
+
 			GameController.GAME_SPEED = currentFrame.getGameDifficulty();
 			MainFrame.PLAYER_ID = currentFrame.getPlayerId();
-			
+
 		}
-		
-			//ps = new PlayerStatus(currentFrame,map,ficharioPlayer.buscarItem(MainFrame.PLAYER_ID));
-			
-		
-		
-		
+
 	}
-	
+
 	public void processKeyEvent(KeyEvent evt) {
 		int code = evt.getKeyCode();
 		lS = new LoadSave();
-		if(code == KeyEvent.VK_UP) {
-			if(currentFrame.getSnek().getDirection().y!=1)
-			currentFrame.getSnek().setDirection(new Point(0, -1));
-        }
-        else if(code == KeyEvent.VK_RIGHT) {
-        	if(currentFrame.getSnek().getDirection().x!=-1)
-        	currentFrame.getSnek().setDirection(new Point(1, 0));
-        }
-        else if(code == KeyEvent.VK_LEFT) {
-        	if(currentFrame.getSnek().getDirection().x!=1)
-        	currentFrame.getSnek().setDirection(new Point(-1, 0));}
-        else if(code == KeyEvent.VK_DOWN) {
-        	if(currentFrame.getSnek().getDirection().y!=-1)
-        	currentFrame.getSnek().setDirection(new Point(0, 1));}
-        else if(code == KeyEvent.VK_SPACE && currentFrame.isPausou()) {
-        	
-        	currentFrame.setPausou(false);
-        }
-        else if(code == KeyEvent.VK_SPACE) {
-        	
-        	currentFrame.setPausou(true);
-        }
-        else if( code == KeyEvent.VK_S) {
-        	lS.processAndWrite(JOptionPane.showInputDialog("Type the name of the save: "),currentFrame);
-        }
+		if (code == KeyEvent.VK_UP) {
+			if (currentFrame.getSnek().getDirection().y != 1)
+				currentFrame.getSnek().setDirection(new Point(0, -1));
+		} else if (code == KeyEvent.VK_RIGHT) {
+			if (currentFrame.getSnek().getDirection().x != -1)
+				currentFrame.getSnek().setDirection(new Point(1, 0));
+		} else if (code == KeyEvent.VK_LEFT) {
+			if (currentFrame.getSnek().getDirection().x != 1)
+				currentFrame.getSnek().setDirection(new Point(-1, 0));
+		} else if (code == KeyEvent.VK_DOWN) {
+			if (currentFrame.getSnek().getDirection().y != -1)
+				currentFrame.getSnek().setDirection(new Point(0, 1));
+		} else if (code == KeyEvent.VK_SPACE && currentFrame.isPausou()) {
+
+			currentFrame.setPausou(false);
+		} else if (code == KeyEvent.VK_SPACE) {
+
+			currentFrame.setPausou(true);
+		} else if ((code == KeyEvent.VK_S) && evt.isControlDown()) {
+			lS.processAndWrite(JOptionPane.showInputDialog("Type the name of the save: "), currentFrame);
+		}
 	}
-	
+
 	public void generateNextFrame() {
-		
-		if(currentFrame == null) {
+
+		if (currentFrame == null) {
 			throw new IllegalStateException("current frame is null. Did you call 'init'?");
 		}
-		
-			
-		if(currentFrame.getSnek().isSnekIsAlive() && !currentFrame.isPausou()) {
+
+		if (currentFrame.getSnek().isSnekIsAlive() && !currentFrame.isPausou()) {
 			Snek snek = currentFrame.getSnek();
 			Segment currentHead = snekHead();
-			Segment nextHead = new Segment(new Point(currentHead.getLocation().x + snek.getDirection().x, currentHead.getLocation().y + snek.getDirection().y));
+			Segment nextHead = new Segment(new Point(currentHead.getLocation().x + snek.getDirection().x,
+					currentHead.getLocation().y + snek.getDirection().y));
 			snek.getSegments().add(0, nextHead);
 			boolean b = verifyGoal();
-			if(currentFrame.getGoal() instanceof Rock) { 
-				timePassed +=GAME_SPEED;
-				Rock r = (Rock)currentFrame.getGoal();
-				if(timePassed>=r.getLifeTime()) {
+			if (currentFrame.getGoal() instanceof Rock) {
+				timePassed += GAME_SPEED;
+				Rock r = (Rock) currentFrame.getGoal();
+				if (timePassed >= r.getLifeTime()) {
 					newGoal(new Apple());
-					timePassed=0;}
+					timePassed = 0;
 				}
-				
-			if(!b) {
-				snek.getSegments().remove(snek.getSegments().size()-1);
-				
 			}
-			if(b) 
+
+			if (!b) {
+				snek.getSegments().remove(snek.getSegments().size() - 1);
+
+			}
+			if (b)
 				processGoal();
-				
+
 			verifyEndGame();
 		}
 	}
-	
+
 	private boolean verifyGoal() {
-		
+
 		Segment currentHead = snekHead();
-		if(currentHead.getLocation().equals(currentFrame.getGoal().getLocation())) {
-			currentFrame.setScore(currentFrame.getGoal().getReward()+ currentFrame.getScore());
+		if (currentHead.getLocation().equals(currentFrame.getGoal().getLocation())) {
+			currentFrame.setScore(currentFrame.getGoal().getReward() + currentFrame.getScore());
 			System.out.println("NOVA PONTUACAO: " + currentFrame.getScore());
-		
+
 			return true;
 		}
 		return false;
 	}
+
 	public void processGoal() {
-		int banana =0, rock =0;
-		if(currentFrame.getScore()%30==0) {
-			banana=1;
+		int banana = 0, rock = 0;
+		if (currentFrame.getScore() % 30 == 0) {
+			banana = 1;
 		}
-		if(currentFrame.getScore()%40==0)
-			rock=1;
-		
-		if(rock==1) {
+		if (currentFrame.getScore() % 40 == 0)
+			rock = 1;
+
+		if (rock == 1) {
 			newGoal(new Rock());
 		}
-		if(banana==1) {
+		if (banana == 1) {
 			newGoal(new Banana());
-			
-			}
-		if(banana==0 && rock==0) 
-		newGoal(new Apple());
-		
-		banana=0;
-		rock=0;
+
+		}
+		if (banana == 0 && rock == 0)
+			newGoal(new Apple());
+
+		banana = 0;
+		rock = 0;
 	}
-	
+
 	private void verifyEndGame() {
 		boolean isStillAlive = true;
-		if(snekHead().getLocation().x<0 || snekHead().getLocation().x>currentFrame.getMap().getQtdCellsWidth() || snekHead().getLocation().y<0 
-				|| snekHead().getLocation().y>currentFrame.getMap().getQtdCellsHeight() || bodyColision() /*|| obstacleColision()*/)
-			isStillAlive=false;
-		currentFrame.getSnek().setSnekIsAlive(isStillAlive); 
+
+		if (snekHead().getLocation().x < 0 || snekHead().getLocation().x > currentFrame.getMap().getQtdCellsWidth()
+				|| snekHead().getLocation().y < 0
+				|| snekHead().getLocation().y > currentFrame.getMap().getQtdCellsHeight() || bodyColision()
+				|| obstacleColision())
+			isStillAlive = false;
+		currentFrame.getSnek().setSnekIsAlive(isStillAlive);
 	}
-	
+
 	private Segment snekHead() {
 		return currentFrame.getSnek().getSegments().get(0);
 	}
-	
+
 	public GameFrame getCurrentFrame() {
 		return currentFrame;
 	}
+
 	public void newGoal(Goal goal) {
-		Point ponto = new Point(random.nextInt(currentFrame.getMap().getQtdCellsWidth()),random.nextInt(currentFrame.getMap().getQtdCellsHeight()));
+		Point ponto = new Point(random.nextInt(currentFrame.getMap().getQtdCellsWidth()),
+				random.nextInt(currentFrame.getMap().getQtdCellsHeight()));
 		currentFrame.setGoal(goal);
 		currentFrame.getGoal().setLocation(ponto);
-		
+
 	}
+
 	private boolean bodyColision() {
-		for(int i = 1; i<currentFrame.getSnek().getSegments().size();i++) {
-			if(snekHead().getLocation().equals(currentFrame.getSnek().getSegments().get(i).getLocation()))
+		for (int i = 1; i < currentFrame.getSnek().getSegments().size(); i++) {
+			if (snekHead().getLocation().equals(currentFrame.getSnek().getSegments().get(i).getLocation()))
 				return true;
 		}
 		return false;
 	}
+
 	private boolean obstacleColision() {
-		
-			if(snekHead().getLocation().equals(new Point(20,20))) {
-				//System.out.println("True");
-				return true;}
-			else
-			{ //System.out.println("False");
-		return false;}
+		for (int i = 0; i < currentFrame.getMap().getObstacles().getSegments().size(); i++) {
+			if (snekHead().getLocation()
+					.equals(currentFrame.getMap().getObstacles().getSegments().get(i).getLocation()))
+				return true;
+
+		}
+		return false;
+	}
+
+	public void initClasses() throws SQLException {
+		ArrayList<Segment> obstacleSegments = new ArrayList<>();
+		ficharioPlayer = new Fichario(new PlayerDao());
+		Obstacle obstacle = new Obstacle(5);
+		random = new Random();
+		int x = random.nextInt(30 - obstacle.getSize());
+		int y = random.nextInt(24 - obstacle.getSize());
+		for (int i = 0; i < obstacle.getSize(); i++) {
+			obstacleSegments.add(new Segment(new Point(x + i, y)));
+		}
+		x = random.nextInt(28 - obstacle.getSize());
+		y = random.nextInt(22);
+		for (int i = 0; i < obstacle.getSize(); i++) {
+			obstacleSegments.add(new Segment(new Point(x, y + i)));
+		}
+		obstacle.setSegments(obstacleSegments);
+		GameMap map = new GameMap(30, 24, new Point(5, 12), obstacle);
+		ArrayList<Segment> snekSegments = new ArrayList<>();
+		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x, map.getSpawnPoint().y)));
+		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x - 1, map.getSpawnPoint().y)));
+		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x - 2, map.getSpawnPoint().y)));
+		Snek snek = new Snek(snekSegments, new Point(1, 0));
+		Apple goal = new Apple(new Point(28, 4));
+
+		currentFrame = new GameFrame(snek, goal, map);
+
 	}
 }

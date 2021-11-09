@@ -56,7 +56,8 @@ public class Fichario<T extends Fichavel> {
 			return false;
 		}
 	}
-       public boolean atualizarScore(int idUnico, int score) {
+
+	public boolean atualizarScore(int idUnico, int score) {
     	   try {
    			PreparedStatement stmt = catalogoDao.updateScore(conn, idUnico, score);
    			boolean result = stmt.execute();

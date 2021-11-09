@@ -38,16 +38,16 @@ public class GameRenderer {
 	
 	public void drawGame(GameFrame frame, Graphics g) {
 		int cellSize = Math.min(panelSize.width/frame.getMap().getQtdCellsWidth(),panelSize.height/frame.getMap().getQtdCellsHeight());
-		//desenha os limites to mapa
+		
 		g.setColor(Color.blue);
 		
 		g.drawRect(0,0, cellSize * frame.getMap().getQtdCellsWidth(), cellSize * frame.getMap().getQtdCellsHeight());
 		
-		// desenha o objetivo
+		
 		g.setColor(frame.getGoal().getColor());
 		g.fillOval(cellSize * frame.getGoal().getLocation().x, cellSize * frame.getGoal().getLocation().y, cellSize, cellSize);
 		
-		//desenha a kroba
+		
 		int snekLenght = frame.getSnek().getSegments().size();
 		g.setColor(new Color(45,180,0));
 		for(int i = 0; i < snekLenght; i++) {
@@ -60,7 +60,7 @@ public class GameRenderer {
 		FontMetrics metrics = g.getFontMetrics(g.getFont());
 		g.drawString("SCORE: " + frame.getScore(), (panelSize.width - metrics.stringWidth("SCORE: " + frame.getScore()))/2, panelSize.height-g.getFont().getSize());
 		for(int i = 0; i<frame.getMap().getObstacles().getSegments().size();i++) {
-		g.fillRect((frame.getMap().getObstacles().getSegments().get(i).getLocation().x),(frame.getMap().getObstacles().getSegments().get(i).getLocation().y),cellSize,cellSize);}
-		// desenha obstaculos, o score atual...
+		g.fillRect((cellSize*frame.getMap().getObstacles().getSegments().get(i).getLocation().x),(cellSize*frame.getMap().getObstacles().getSegments().get(i).getLocation().y),cellSize,cellSize);}
+	
 	}
 }

@@ -6,6 +6,10 @@ public class Obstacle {
 private ArrayList<Segment> segments;
 private int size;
 
+public Obstacle(int size) {
+	this.size = size;
+	this.segments = new ArrayList();
+}
 public Obstacle(ArrayList<Segment> segments) {
 	this.segments = segments;
 }

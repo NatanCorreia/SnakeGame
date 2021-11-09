@@ -58,6 +58,7 @@ public class PlayerDao implements FichavelDao<Player> {
 			p.setLogin(queryResult.getString("login"));
 			p.setEmail(queryResult.getString("email"));
 			p.setPassword(queryResult.getString("password"));
+			p.setScore(queryResult.getInt("score"));
 
 			Players.add(p);
 		}

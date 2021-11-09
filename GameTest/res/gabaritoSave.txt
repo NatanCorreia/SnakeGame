@@ -4,6 +4,9 @@ tipo goal
 score
 x snakedirection
 y snakedirection
-x segments
-y segments
 dificulty (0 easy, 1 normal, 2 hard)
+playerID
+x Snakesegments
+y Snakesegments
+x Mapsegments
+y Mapsegments
