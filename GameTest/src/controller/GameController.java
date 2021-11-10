@@ -11,9 +11,12 @@ import javax.swing.JOptionPane;
 import helpers.LoadSave;
 import model.Apple;
 import model.Banana;
+import model.EasyObstacle;
 import model.GameFrame;
 import model.GameMap;
 import model.Goal;
+import model.HardObstacle;
+import model.NormalObstacle;
 import model.Obstacle;
 import model.Player;
 import model.PlayerStatus;
@@ -27,11 +30,12 @@ public class GameController {
 	private GameFrame currentFrame = null;
 	public static int GAME_SPEED;
 	private Random random;
-	private int timePassed = 0;
+	private int timePassed = 0, timePassedObs = 0;
 	private ArrayList<Point> pontos;
 	private LoadSave lS = new LoadSave();
 	private Fichario<Player> ficharioPlayer;
 	private PlayerStatus ps;
+	private boolean grow = true;
 
 	public void init() throws SQLException {
 		initClasses();
@@ -100,9 +104,39 @@ public class GameController {
 			}
 			if (b)
 				processGoal();
+			if (GameController.GAME_SPEED == 40) {
+				HardObstacle hB = (HardObstacle) currentFrame.getMap().getObstacles();
+				Point dir = hB.getDirection();
+				Segment first = currentFrame.getMap().getObstacles().getSegments().get(0);
+				Segment next = new Segment(new Point(first.getLocation().x + dir.x, first.getLocation().y + dir.y));
+				if (currentFrame.getMap().getObstacles().getSegments().size() != 34 && grow) {
+					if (timePassedObs >= 400) {
+						currentFrame.getMap().getObstacles().getSegments().add(0, next);
+						System.out.println(currentFrame.getMap().getObstacles().getSegments().size());
+						timePassedObs = 0;
+					}
+					if (timePassedObs != 400)
+						timePassedObs += GAME_SPEED;
+				}
+			}
+			if (currentFrame.getMap().getObstacles() instanceof HardObstacle) {
+				if (currentFrame.getMap().getObstacles().getSegments().size() == 34 || !grow) {
+					grow = false;
+					if (timePassedObs >= 400) {
+						currentFrame.getMap().getObstacles().getSegments().remove(0);
+						if (currentFrame.getMap().getObstacles().getSegments().size() == 20)
+							grow = true;
 
-			verifyEndGame();
+						System.out.println(currentFrame.getMap().getObstacles().getSegments().size());
+						timePassedObs = 0;
+					}
+					if (timePassedObs != 400)
+						timePassedObs += GAME_SPEED;
+				}
+			}
 		}
+
+		verifyEndGame();
 	}
 
 	private boolean verifyGoal() {
@@ -185,22 +219,18 @@ public class GameController {
 	}
 
 	public void initClasses() throws SQLException {
-		ArrayList<Segment> obstacleSegments = new ArrayList<>();
+		GameMap map = null;
 		ficharioPlayer = new Fichario(new PlayerDao());
-		Obstacle obstacle = new Obstacle(5);
+		if (GameController.GAME_SPEED == 100) {
+			map = new GameMap(30, 24, new Point(5, 12), initEasyObstacle());
+		}
+		if (GameController.GAME_SPEED == 70) {
+			map = new GameMap(30, 24, new Point(5, 12), initNormalObstacle());
+		}
+		if (GameController.GAME_SPEED == 40) {
+			map = new GameMap(30, 24, new Point(5, 12), initHardObstacle(new Point(1, 0)));
+		}
 		random = new Random();
-		int x = random.nextInt(30 - obstacle.getSize());
-		int y = random.nextInt(24 - obstacle.getSize());
-		for (int i = 0; i < obstacle.getSize(); i++) {
-			obstacleSegments.add(new Segment(new Point(x + i, y)));
-		}
-		x = random.nextInt(28 - obstacle.getSize());
-		y = random.nextInt(22);
-		for (int i = 0; i < obstacle.getSize(); i++) {
-			obstacleSegments.add(new Segment(new Point(x, y + i)));
-		}
-		obstacle.setSegments(obstacleSegments);
-		GameMap map = new GameMap(30, 24, new Point(5, 12), obstacle);
 		ArrayList<Segment> snekSegments = new ArrayList<>();
 		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x, map.getSpawnPoint().y)));
 		snekSegments.add(new Segment(new Point(map.getSpawnPoint().x - 1, map.getSpawnPoint().y)));
@@ -209,6 +239,72 @@ public class GameController {
 		Apple goal = new Apple(new Point(28, 4));
 
 		currentFrame = new GameFrame(snek, goal, map);
+
+	}
+
+	public Obstacle initEasyObstacle() {
+		ArrayList<Segment> obstacleSegments = new ArrayList<>();
+		Obstacle obstacle = new EasyObstacle();
+
+		int x = 10;
+		int y = 10;
+		for (int i = 0; i < obstacle.getSize(); i++) {
+			obstacleSegments.add(new Segment(new Point(x + i, y)));
+		}
+		x = 4;
+		y = 4;
+		for (int i = 0; i < obstacle.getSize(); i++) {
+			obstacleSegments.add(new Segment(new Point(x, y + i)));
+		}
+		obstacle.setSegments(obstacleSegments);
+		return obstacle;
+	}
+
+	public Obstacle initNormalObstacle() {
+		ArrayList<Segment> obstacleSegments = new ArrayList<>();
+		Obstacle obstacle = new NormalObstacle();
+
+		int x = 10;
+		int y = 10;
+		for (int i = 0; i < obstacle.getSize(); i++) {
+			obstacleSegments.add(new Segment(new Point(x + i, y)));
+		}
+		x = 4;
+		y = 4;
+		for (int i = 0; i < obstacle.getSize(); i++) {
+			obstacleSegments.add(new Segment(new Point(x, y + i)));
+		}
+		x = 15;
+		y = 10;
+		for (int i = 0; i < obstacle.getSize(); i++) {
+			obstacleSegments.add(new Segment(new Point(x, y + i)));
+		}
+		obstacle.setSegments(obstacleSegments);
+		return obstacle;
+
+	}
+
+	public Obstacle initHardObstacle(Point dir) {
+		ArrayList<Segment> obstacleSegments = new ArrayList<>();
+		Obstacle obstacle = new HardObstacle(dir);
+
+		int x = 10;
+		int y = 10;
+		for (int i = 0; i < obstacle.getSize(); i++) {
+			obstacleSegments.add(new Segment(new Point(x + i, y)));
+		}
+		x = 4;
+		y = 4;
+		for (int i = 0; i < obstacle.getSize(); i++) {
+			obstacleSegments.add(new Segment(new Point(x, y + i)));
+		}
+		x = 15;
+		y = 10;
+		for (int i = 0; i < obstacle.getSize(); i++) {
+			obstacleSegments.add(new Segment(new Point(x, y + i)));
+		}
+		obstacle.setSegments(obstacleSegments);
+		return obstacle;
 
 	}
 }

@@ -3,17 +3,18 @@ package controller;
 import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableRowSorter;
 
 import model.Player;
 
 public class PlayerTM extends AbstractTableModel {
 	private ArrayList<Player> linhas;
 	private String[] colunas = null;
-
+	private TableRowSorter tableSorter;
 	public PlayerTM(ArrayList<Player> linhas, String[] colunas) {
 		this.linhas = linhas;
 		this.colunas = colunas;
-
+		tableSorter = new TableRowSorter(this);
 	}
 
 	@Override
@@ -33,8 +34,10 @@ public class PlayerTM extends AbstractTableModel {
 
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
-
+		if(columnIndex!=3)
 		return String.class;
+		else
+			return int.class;
 	}
 
 	@Override
@@ -72,17 +75,17 @@ public class PlayerTM extends AbstractTableModel {
 			p.setEmail(aValue.toString());
 			break;
 		case 3:
-			p.setScore((int) aValue);
+			p.setScore((int)aValue);
 
 		default:
-			// Isto não deveria acontecer...
+			
 		}
 		fireTableCellUpdated(rowIndex, columnIndex);
 	}
 
-	// modifica na linha especificada
+	
 	public void setValueAt(Player aValue, int rowIndex) {
-		Player p = linhas.get(rowIndex); // Carrega o item da linha que deve ser modificado
+		Player p = linhas.get(rowIndex); 
 		p.setName(aValue.getName());
 		p.setLogin(aValue.getLogin());
 		p.setEmail(aValue.getEmail());
@@ -105,13 +108,13 @@ public class PlayerTM extends AbstractTableModel {
 	}
 
 	public void addPlayer(Player p) {
-		// Adiciona o registro.
+		
 		linhas.add(p);
 		int ultimoIndice = getRowCount() - 1;
 		fireTableRowsInserted(ultimoIndice, ultimoIndice);
 	}
 
-	/* Remove a linha especificada. */
+	
 	public void remove(int indiceLinha) {
 		linhas.remove(indiceLinha);
 		fireTableRowsDeleted(indiceLinha, indiceLinha);
@@ -121,20 +124,26 @@ public class PlayerTM extends AbstractTableModel {
 
 		int tamanhoAntigo = getRowCount();
 
-		// Adiciona os registros.
+		
 		linhas.addAll(p);
 		fireTableRowsInserted(tamanhoAntigo, getRowCount() - 1);
 	}
 
-	/* Remove todos os registros. */
+	
 	public void limpar() {
 		linhas.clear();
 		fireTableDataChanged();
 	}
 
-	/* Verifica se este table model esta vazio. */
+	
 	public boolean isEmpty() {
 		return linhas.isEmpty();
 	}
+
+	public TableRowSorter getTableSorter() {
+		
+		return tableSorter;
+	}
+	
 
 }

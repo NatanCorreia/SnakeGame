@@ -34,72 +34,47 @@ public class MainFrame extends JFrame {
 	private ButtonsPanel bP = new ButtonsPanel();
 	private DifficultyPanel dP = new DifficultyPanel();
 	private UserTextPanel uTP = new UserTextPanel();
-	private Fichario<Player> ficharioPlayer = new Fichario(new PlayerDao());
-	private ArrayList<Player> players = new ArrayList();
-	private RankingPanel rP = new RankingPanel();
-	private PlayerTM pTM ;
+	private Fichario<Player> ficharioPlayer = new Fichario<Player>(new PlayerDao());
+	private ArrayList<Player> players = new ArrayList<Player>();
+	private RankingPanel rP;
+	private PlayerTM pTM;
 	private JFileChooser chooser = new JFileChooser("C:\\Users\\Natan Correia\\git\\SnakeGame2\\GameTest\\res");
 
 	public MainFrame() throws SQLException {
 		super("SNAKE GAME");
+		uiMenuPanel = new JPanel();
+		uiMenuPanel.setPreferredSize(new Dimension(600, 600));
+		uiMenuPanel.setBorder(new EmptyBorder(80, 0, 0, 0));
+		uiMenuPanel.add(bP);
+
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		getContentPane().add(uiMenuPanel, BorderLayout.CENTER);
+		pack();
+		setResizable(false);
+		setLocationRelativeTo(null);
 
 		bP.getPlayButton().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				uiMenuPanel.setVisible(false);
-				uiDPanel = new JPanel();
-				uiDPanel.setPreferredSize(new Dimension(600, 600));
-				uiDPanel.setBorder(new EmptyBorder(80, 0, 0, 0));
-				uiDPanel.add(dP);
-				getContentPane().add(uiDPanel, BorderLayout.CENTER);
+				playButtonActionPerformed(e);
+
 				dP.getEasyButton().addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						uiDPanel.setVisible(false);
-						GameController.GAME_SPEED = 100;
-						GamePanel gamePanel;
-						try {
-							gamePanel = new GamePanel();
-							getContentPane().add(gamePanel, BorderLayout.CENTER);
-							gamePanel.requestFocus();
-						} catch (SQLException e1) {
-
-							e1.printStackTrace();
-						}
-
+						easyButtonActionPerformed(e);
 					}
 				});
 				dP.getNormalButton().addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						uiDPanel.setVisible(false);
-						GameController.GAME_SPEED = 70;
-						GamePanel gamePanel;
-						try {
-							gamePanel = new GamePanel();
-							getContentPane().add(gamePanel, BorderLayout.CENTER);
-							gamePanel.requestFocus();
-						} catch (SQLException e1) {
-
-							e1.printStackTrace();
-						}
+						normalButtonActionPerformed(e);
 
 					}
 				});
 				dP.getHardButton().addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(ActionEvent e) {
-						uiDPanel.setVisible(false);
-						GameController.GAME_SPEED = 40;
-						GamePanel gamePanel;
-						try {
-							gamePanel = new GamePanel();
-							getContentPane().add(gamePanel, BorderLayout.CENTER);
-							gamePanel.requestFocus();
-						} catch (SQLException e1) {
-
-							e1.printStackTrace();
-						}
+						hardButtonActionPerformed(e);
 
 					}
 				});
@@ -118,77 +93,139 @@ public class MainFrame extends JFrame {
 		bP.getLoadButton().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
-				FileNameExtensionFilter filter = new FileNameExtensionFilter("Choose a txt file:", "txt");
-				chooser.setFileFilter(filter);
-				int retorno = chooser.showOpenDialog(null);
 
-			
-			
-				if (retorno == JFileChooser.APPROVE_OPTION) {
-					MainFrame.FILE_NAME = "Natan";
-					MainFrame.Load = true;
-					
-				}
-				//uiMenuPanel.setVisible(true);
-				GamePanel gamePanel;
-				
-				try {
-					gamePanel = new GamePanel();
-					uiMenuPanel.setVisible(false);
-					getContentPane().add(gamePanel, BorderLayout.CENTER);
-					//getContentPane().remove(uiMenuPanel);
-					gamePanel.requestFocus();
-				
-					
-				} catch (SQLException e1) {
-
-					e1.printStackTrace();
-				}
+				loadButtonActionPerformed(e);
 
 			}
 		});
 		bP.getRankButton().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				uiMenuPanel.setVisible(false);
-				String [] colunas = {"Nome","Email","Login","Score"};
-				players = ficharioPlayer.buscarTudo();
-				pTM = new PlayerTM(players,colunas);
-				System.out.println(players.get(1).getScore());
-				rP.getPlayersTable().setModel(pTM);
-				getContentPane().add(rP, BorderLayout.CENTER);
-				rP.requestFocus();
+				rankButtonActionPerformed(e);
 
 			}
 		});
-		uiMenuPanel = new JPanel();
-		uiMenuPanel.setPreferredSize(new Dimension(600, 600));
-		uiMenuPanel.setBorder(new EmptyBorder(80, 0, 0, 0));
-		uiMenuPanel.add(bP);
-
-		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		getContentPane().add(uiMenuPanel, BorderLayout.CENTER);
-		pack();
-		setResizable(false);
-		setLocationRelativeTo(null);
 
 		uTP.getSubmit().addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (uTP.getNome().getText().isBlank() || uTP.getEmail().getText().isBlank()
-						|| uTP.getLogin().getText().isBlank() || uTP.getPassword().getText().isBlank()) {
-					JOptionPane.showMessageDialog(null, "Preencher todos os campos");
-				}
-				Player playerTemp = new Player(uTP.getNome().getText(), uTP.getLogin().getText(),
-						uTP.getEmail().getText(), uTP.getPassword().getText());
-				ficharioPlayer.cadastrar(playerTemp);
-				MainFrame.PLAYER_ID = playerTemp.getId();
-				uTP.setVisible(false);
-				uiMenuPanel.setVisible(true);
+				submitButtonActionPerformed(e);
 
 			}
 		});
+	}
+
+	private void playButtonActionPerformed(ActionEvent e) {
+		uiMenuPanel.setVisible(false);
+		uiDPanel = new JPanel();
+		uiDPanel.setPreferredSize(new Dimension(600, 600));
+		uiDPanel.setBorder(new EmptyBorder(80, 0, 0, 0));
+		uiDPanel.add(dP);
+		getContentPane().add(uiDPanel, BorderLayout.CENTER);
+	}
+
+	private void easyButtonActionPerformed(ActionEvent e) {
+		uiDPanel.setVisible(false);
+		GameController.GAME_SPEED = 100;
+		GamePanel gamePanel;
+		try {
+			gamePanel = new GamePanel();
+			getContentPane().add(gamePanel, BorderLayout.CENTER);
+			gamePanel.requestFocus();
+		} catch (SQLException e1) {
+
+			e1.printStackTrace();
+		}
+
+	}
+
+	private void normalButtonActionPerformed(ActionEvent e) {
+		uiDPanel.setVisible(false);
+		GameController.GAME_SPEED = 70;
+		GamePanel gamePanel;
+		try {
+			gamePanel = new GamePanel();
+			getContentPane().add(gamePanel, BorderLayout.CENTER);
+			gamePanel.requestFocus();
+		} catch (SQLException e1) {
+
+			e1.printStackTrace();
+		}
+	}
+
+	private void hardButtonActionPerformed(ActionEvent e) {
+		uiDPanel.setVisible(false);
+		GameController.GAME_SPEED = 40;
+		GamePanel gamePanel;
+		try {
+			gamePanel = new GamePanel();
+			getContentPane().add(gamePanel, BorderLayout.CENTER);
+			gamePanel.requestFocus();
+		} catch (SQLException e1) {
+
+			e1.printStackTrace();
+		}
+	}
+
+	private void loadButtonActionPerformed(ActionEvent e) {
+		FileNameExtensionFilter filter = new FileNameExtensionFilter("Choose a txt file:", "txt");
+		chooser.setFileFilter(filter);
+		int retorno = chooser.showOpenDialog(null);
+
+		if (retorno == JFileChooser.APPROVE_OPTION) {
+			MainFrame.FILE_NAME = chooser.getSelectedFile().getName();
+			MainFrame.Load = true;
+
+		}
+
+		GamePanel gamePanel;
+
+		try {
+			gamePanel = new GamePanel();
+			uiMenuPanel.setVisible(false);
+			getContentPane().add(gamePanel, BorderLayout.CENTER);
+			gamePanel.requestFocus();
+
+		} catch (SQLException e1) {
+
+			e1.printStackTrace();
+		}
+	}
+
+	private void rankButtonActionPerformed(ActionEvent e) {
+		uiMenuPanel.setVisible(false);
+		String[] colunas = { "Nome", "Email", "Login", "Score" };
+		players = ficharioPlayer.buscarTudo();
+		pTM = new PlayerTM(players, colunas);
+		rP = new RankingPanel(pTM);
+		rP.getPlayersTable().setModel(pTM);
+		rP.getPlayersTable().setRowSorter(pTM.getTableSorter());
+		pTM.getTableSorter().toggleSortOrder(3);
+		pTM.getTableSorter().toggleSortOrder(3);
+		getContentPane().add(rP, BorderLayout.CENTER);
+		rP.requestFocus();
+		rP.getBackButton().addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				rP.setVisible(false);
+				uTP.setVisible(true);
+
+			}
+		});
+	}
+
+	private void submitButtonActionPerformed(ActionEvent e) {
+		if (uTP.getNome().getText().isBlank() || uTP.getEmail().getText().isBlank()
+				|| uTP.getLogin().getText().isBlank() || uTP.getPassword().getText().isBlank()) {
+			JOptionPane.showMessageDialog(null, "Preencher todos os campos");
+		}
+		Player playerTemp = new Player(uTP.getNome().getText(), uTP.getLogin().getText(), uTP.getEmail().getText(),
+				uTP.getPassword().getText());
+		ficharioPlayer.cadastrar(playerTemp);
+		MainFrame.PLAYER_ID = playerTemp.getId();
+		uTP.setVisible(false);
+		uiMenuPanel.setVisible(true);
 	}
 
 	public static void main(String[] args) {
@@ -214,7 +251,7 @@ class GamePanel extends JPanel implements ActionListener, KeyListener {
 	private Timer timer;
 	private GameRenderer renderer = new GameRenderer(PANEL_SIZE);
 	private GameController controller = new GameController();
-	private Fichario<Player> ficharioPlayer = new Fichario(new PlayerDao());	
+	private Fichario<Player> ficharioPlayer = new Fichario(new PlayerDao());
 
 	public GamePanel() throws SQLException {
 		addKeyListener(this);

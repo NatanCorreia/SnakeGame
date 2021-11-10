@@ -50,7 +50,7 @@ public class LoadSave {
 	}
 
 	public GameFrame processAndLoad(String fileName, GameFrame frame) {
-		File file = new File("res/" + fileName + ".txt");
+		File file = new File("res/" + fileName);
 		String x = "nada", y;
 		ArrayList<Segment> sSeg = new ArrayList<Segment>();
 		ArrayList<Segment> mSeg = new ArrayList<Segment>();

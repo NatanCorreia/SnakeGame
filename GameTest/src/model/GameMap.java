@@ -9,7 +9,7 @@ public class GameMap {
 	private Point spawnPoint;
 	private Obstacle obstacles;
 	
-	// pode add tb obstaculos...
+	
 	public GameMap(int cellsWidth, int cellsHeight, Point spawnPoint, Obstacle obstacles) {
 		this.qtdCellsWidth = cellsWidth;
 		this.qtdCellsHeight = cellsHeight;

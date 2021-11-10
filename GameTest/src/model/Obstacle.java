@@ -1,18 +1,14 @@
 package model;
 
+import java.awt.Color;
 import java.util.ArrayList;
 
-public class Obstacle {
+public abstract class Obstacle {
 private ArrayList<Segment> segments;
 private int size;
+private Color color;
 
-public Obstacle(int size) {
-	this.size = size;
-	this.segments = new ArrayList();
-}
-public Obstacle(ArrayList<Segment> segments) {
-	this.segments = segments;
-}
+
 public ArrayList<Segment> getSegments() {
 	return segments;
 }
@@ -25,5 +21,12 @@ public int getSize() {
 public void setSize(int size) {
 	this.size = size;
 }
+public Color getColor() {
+	return color;
+}
+public void setColor(Color color) {
+	this.color = color;
+}
+
 
 }
