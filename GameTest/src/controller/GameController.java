@@ -2,6 +2,7 @@ package controller;
 
 import java.awt.Point;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Random;
@@ -27,7 +28,7 @@ import view.MainFrame;
 
 public class GameController {
 
-	private GameFrame currentFrame = null;
+	private GameFrame currentFrame = new GameFrame();
 	public static int GAME_SPEED;
 	private Random random;
 	private int timePassed = 0, timePassedObs = 0;
@@ -38,14 +39,29 @@ public class GameController {
 	private boolean grow = true;
 
 	public void init() throws SQLException {
-		initClasses();
-		currentFrame.checkDifficulty();
+		
+		
 		if (MainFrame.Load) {
+			try {
+				GAME_SPEED = setLoadDifficulty(lS.ReadLoadLine(MainFrame.FILE_NAME));
+			} catch (NumberFormatException e) {
+				
+				e.printStackTrace();
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+			initClasses();
+			currentFrame.checkDifficulty();
 			currentFrame = lS.processAndLoad(MainFrame.FILE_NAME, currentFrame);
 
 			GameController.GAME_SPEED = currentFrame.getGameDifficulty();
 			MainFrame.PLAYER_ID = currentFrame.getPlayerId();
 
+		}
+		else {
+			initClasses();
+			currentFrame.checkDifficulty();
 		}
 
 	}
@@ -217,7 +233,17 @@ public class GameController {
 		}
 		return false;
 	}
+private int setLoadDifficulty(int i) {
+	if (i == 0)
+		return 40;
 
+	if (i == 1)
+		return 70;
+
+	if (i == 2)
+		return 100;
+	return 300;
+}
 	public void initClasses() throws SQLException {
 		GameMap map = null;
 		ficharioPlayer = new Fichario(new PlayerDao());

@@ -175,6 +175,7 @@ public class MainFrame extends JFrame {
 		if (retorno == JFileChooser.APPROVE_OPTION) {
 			MainFrame.FILE_NAME = chooser.getSelectedFile().getName();
 			MainFrame.Load = true;
+			
 
 		}
 
@@ -209,7 +210,7 @@ public class MainFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 
 				rP.setVisible(false);
-				uTP.setVisible(true);
+				uiMenuPanel.setVisible(true);
 
 			}
 		});

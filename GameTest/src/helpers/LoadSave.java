@@ -3,7 +3,10 @@ package helpers;
 import java.awt.Point;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -50,6 +53,7 @@ public class LoadSave {
 	}
 
 	public GameFrame processAndLoad(String fileName, GameFrame frame) {
+
 		File file = new File("res/" + fileName);
 		String x = "nada", y;
 		ArrayList<Segment> sSeg = new ArrayList<Segment>();
@@ -82,6 +86,15 @@ public class LoadSave {
 		}
 
 		return frame;
+	}
+
+	public int ReadLoadLine(String fileName) throws NumberFormatException, IOException {
+	
+		File file = new File("res/" + fileName);
+		
+		int difficultyValue = Integer.parseInt(Files.readAllLines(file.toPath()).get(6));
+		System.out.println(difficultyValue);
+		return difficultyValue;
 	}
 
 	private Goal checkAndSetGoal(String x, String y, String tipo) {

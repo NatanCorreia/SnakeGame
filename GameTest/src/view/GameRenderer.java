@@ -56,6 +56,7 @@ public class GameRenderer {
 		}
 		if(frame.getDifficulty()==1) {
 			for (int i = 0; i < frame.getMap().getObstacles().getSegments().size(); i++) {
+				g.setColor(frame.getMap().getObstacles().getColor());
 				g.fillOval((cellSize * frame.getMap().getObstacles().getSegments().get(i).getLocation().x),
 						(cellSize * frame.getMap().getObstacles().getSegments().get(i).getLocation().y), cellSize,
 						cellSize);}

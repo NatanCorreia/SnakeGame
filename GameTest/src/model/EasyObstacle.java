@@ -8,7 +8,7 @@ public class EasyObstacle extends Obstacle {
 	public EasyObstacle() {
 		
 		this.setSize(5);
-		this.setColor(Color.blue);
+		this.setColor(Color.yellow);
 		
 	}
 	

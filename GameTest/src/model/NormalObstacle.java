@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class NormalObstacle extends Obstacle {
 	public NormalObstacle() {
 
-		this.setSize(5);
+		this.setSize(7);
 		this.setColor(Color.blue);
 
 	}
